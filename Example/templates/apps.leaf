@@ -1,0 +1,24 @@
+#extend("base"):
+    #export("title"):
+        Apps
+    #endexport
+
+    #export("body"):
+        <div id="content">
+            #for(item in items):
+                <section>
+                  #for(src in item.metadata.images):
+                    <img src="#(src)" alt="" />
+                  #endfor
+
+                  <h1>#(item.title)</h1>
+                  #unsafeHTML(item.body)
+                  
+                  #if(item.metadata.url):
+                    <a href="#(item.metadata.url)">App Store</a>
+                  #endif
+                </section>
+            #endfor
+        </div>
+    #endexport
+#endextend

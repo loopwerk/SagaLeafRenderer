@@ -1,0 +1,11 @@
+#extend("base"):
+    #export("title"):
+        #(item.title)
+    #endexport
+
+    #export("body"):
+        <div id="page">
+            #unsafeHTML(item.body)
+        </div>
+    #endexport
+#endextend
