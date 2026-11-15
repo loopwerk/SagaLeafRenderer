@@ -1,16 +1,16 @@
+import Foundation
 import LeafKit
-import Saga
-import SagaPathKit
 import NIOCore
 import NIOPosix
-import Foundation
+import Saga
+import SagaPathKit
 
 public func createLeafRenderer(templatesDirectory: Path) -> LeafRenderer {
   let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 2)
   let threadPool = NIOThreadPool(numberOfThreads: 2)
   threadPool.start()
   let fileio = NonBlockingFileIO(threadPool: threadPool)
-  
+
   let absPath = URL(fileURLWithPath: templatesDirectory.string).standardized.path
   let configuration = LeafConfiguration(rootDirectory: absPath)
   return LeafRenderer(
@@ -25,11 +25,11 @@ public func createLeafRenderer(templatesDirectory: Path) -> LeafRenderer {
   )
 }
 
-nonisolated(unsafe) public var defaultLeafRenderer: LeafRenderer?
+public nonisolated(unsafe) var defaultLeafRenderer: LeafRenderer?
 
 private extension ByteBuffer {
   var string: String {
-    String(decoding: self.readableBytesView, as: UTF8.self)
+    String(decoding: readableBytesView, as: UTF8.self)
   }
 }
 
@@ -46,40 +46,41 @@ public func leaf(_ template: String, renderer: LeafRenderer? = nil) -> (@Sendabl
 
 // MARK: - [String: Any] to [String: LeafData] conversion
 
-extension Dictionary where Key == String, Value == Any {
+extension [String: Any] {
   func toLeafData() -> [String: LeafData] {
-    return self.mapValues { anyToLeafData($0) }
+    return mapValues { anyToLeafData($0) }
   }
 }
 
 private func anyToLeafData(_ value: Any) -> LeafData {
   switch value {
-  case let string as String:
-    return .string(string)
-  case let int as Int:
-    return .int(int)
-  case let double as Double:
-    return .double(double)
-  case let bool as Bool:
-    return .bool(bool)
-  case let date as Date:
-    return .double(date.timeIntervalSince1970)
-  case let path as Path:
-    return .string(path.string)
-  case let dict as [String: Any]:
-    return .dictionary(dict.toLeafData())
-  case let array as [Any]:
-    return .array(array.map { anyToLeafData($0) })
-  case let encodable as Encodable:
-    return encodableToLeafData(encodable)
-  default:
-    return .string(nil)
+    case let string as String:
+      return .string(string)
+    case let int as Int:
+      return .int(int)
+    case let double as Double:
+      return .double(double)
+    case let bool as Bool:
+      return .bool(bool)
+    case let date as Date:
+      return .double(date.timeIntervalSince1970)
+    case let path as Path:
+      return .string(path.string)
+    case let dict as [String: Any]:
+      return .dictionary(dict.toLeafData())
+    case let array as [Any]:
+      return .array(array.map { anyToLeafData($0) })
+    case let encodable as Encodable:
+      return encodableToLeafData(encodable)
+    default:
+      return .string(nil)
   }
 }
 
 private func encodableToLeafData(_ value: Encodable) -> LeafData {
   guard let data = try? JSONEncoder().encode(value),
-        let json = try? JSONSerialization.jsonObject(with: data) else {
+        let json = try? JSONSerialization.jsonObject(with: data)
+  else {
     return .string(nil)
   }
   return jsonToLeafData(json)
@@ -87,21 +88,21 @@ private func encodableToLeafData(_ value: Encodable) -> LeafData {
 
 private func jsonToLeafData(_ value: Any) -> LeafData {
   switch value {
-  case let string as String:
-    return .string(string)
-  case let number as NSNumber:
-    if CFBooleanGetTypeID() == CFGetTypeID(number) {
-      return .bool(number.boolValue)
-    } else if number.doubleValue == Double(number.intValue) {
-      return .int(number.intValue)
-    } else {
-      return .double(number.doubleValue)
-    }
-  case let array as [Any]:
-    return .array(array.map { jsonToLeafData($0) })
-  case let dict as [String: Any]:
-    return .dictionary(dict.mapValues { jsonToLeafData($0) })
-  default:
-    return .string(nil)
+    case let string as String:
+      return .string(string)
+    case let number as NSNumber:
+      if CFBooleanGetTypeID() == CFGetTypeID(number) {
+        return .bool(number.boolValue)
+      } else if number.doubleValue == Double(number.intValue) {
+        return .int(number.intValue)
+      } else {
+        return .double(number.doubleValue)
+      }
+    case let array as [Any]:
+      return .array(array.map { jsonToLeafData($0) })
+    case let dict as [String: Any]:
+      return .dictionary(dict.mapValues { jsonToLeafData($0) })
+    default:
+      return .string(nil)
   }
 }

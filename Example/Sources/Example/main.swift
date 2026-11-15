@@ -1,8 +1,8 @@
 import Foundation
 import Saga
-import SagaPathKit
-import SagaParsleyMarkdownReader
 import SagaLeafRenderer
+import SagaParsleyMarkdownReader
+import SagaPathKit
 
 struct AppMetadata: Metadata {
   let url: URL?
@@ -15,16 +15,17 @@ defaultLeafRenderer = createLeafRenderer(templatesDirectory: saga.rootPath + "te
 try await saga
   // All markdown files within the "apps" subfolder will be parsed to html,
   // using AppMetadata as the Item's metadata type.
-    .register(
-      folder: "apps",
-      metadata: AppMetadata.self,
-      readers: [.parsleyMarkdownReader],
-      writers: [.listWriter(leaf("apps"))]
-    )
+  .register(
+    folder: "apps",
+    metadata: AppMetadata.self,
+    readers: [.parsleyMarkdownReader],
+    writers: [.listWriter(leaf("apps"))]
+  )
 
   // All the Markdown files will be parsed to html,
-  // using the default EmptyMetadata as the Item's metadata type.
+  // using EmptyMetadata as the Item's metadata type.
   .register(
+    metadata: EmptyMetadata.self,
     readers: [.parsleyMarkdownReader],
     writers: [.itemWriter(leaf("page"))]
   )

@@ -5,15 +5,16 @@ import PackageDescription
 let package = Package(
   name: "SagaLeafRenderer",
   platforms: [
-    .macOS(.v14)
+    .macOS(.v14),
   ],
   products: [
     .library(
       name: "SagaLeafRenderer",
-      targets: ["SagaLeafRenderer"]),
+      targets: ["SagaLeafRenderer"]
+    ),
   ],
   dependencies: [
-    .package(url: "https://github.com/loopwerk/Saga.git", from: "3.1.0"),
+    .package(url: "https://github.com/loopwerk/Saga.git", "3.1.0" ..< "5.0.0"),
     .package(url: "https://github.com/vapor/leaf-kit", from: "1.13.0"),
   ],
   targets: [
@@ -21,7 +22,7 @@ let package = Package(
       name: "SagaLeafRenderer",
       dependencies: [
         "Saga",
-        .product(name: "LeafKit", package: "leaf-kit")
+        .product(name: "LeafKit", package: "leaf-kit"),
       ]
     ),
   ]
